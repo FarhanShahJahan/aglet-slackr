@@ -114,6 +114,103 @@ slackr <- function(
       channel = channel,
       username = username,
       emoji = icon_emoji,
+      txt = output,
+      link_names = 1,
+      thread_ts = thread_ts,
+      reply_broadcast = reply_broadcast
+    )
+  }
+
+  invisible(resp)
+}
+
+slackr_code <- function(
+  ...,
+  channel = Sys.getenv("SLACK_CHANNEL"),
+  username = Sys.getenv("SLACK_USERNAME"),
+  icon_emoji = Sys.getenv("SLACK_ICON_EMOJI"),
+  token = Sys.getenv("SLACK_TOKEN"),
+  thread_ts = NULL,
+  reply_broadcast = FALSE
+) {
+  local_options(list(cli.num_colors = 1))
+
+  warn_for_args(
+    token,
+    username = username,
+    icon_emoji = icon_emoji
+  )
+
+  if (!missing(...)) {
+    # get the arglist
+    args <- substitute(list(...))[-1L]
+
+    # setup in-memory sink
+    rval <- NULL
+    fil <- textConnection("rval", "w", local = TRUE)
+
+    sink(fil)
+    on.exit({
+      sink()
+      close(fil)
+    })
+
+    # where we'll need to eval expressions
+    pf <- parent.frame()
+
+    # how we'll eval expressions
+    evalVis <- function(expr) withVisible(eval(expr, pf))
+
+    # for each expression
+    for (i in seq_along(args)) {
+      expr <- args[[i]]
+
+      # do something, note all the newlines...Slack ``` needs them
+      tmp <- switch(
+        mode(expr),
+        # if it's actually an expresison, iterate over it
+        expression = {
+          cat(sprintf("> %s\n", deparse(expr)))
+          lapply(expr, evalVis)
+        },
+        # if it's a call or a name, eval, printing run output as if in console
+        call = ,
+        name = {
+          cat(sprintf("> %s\n", deparse(expr)))
+          list(evalVis(expr))
+        },
+        # if pretty much anything else (i.e. a bare value) just output it
+        integer = ,
+        double = ,
+        complex = ,
+        raw = ,
+        logical = ,
+        numeric = cat(sprintf("%s\n\n", as.character(expr))),
+        character = cat(sprintf("%s\n\n", expr)),
+        abort("mode of argument not handled at present by slackr")
+      )
+
+      for (item in tmp) {
+        if (item$visible) {
+          print(item$value)
+          cat("\n")
+        }
+      }
+    }
+
+    on.exit()
+
+    sink()
+    close(fil)
+
+    # combined all of them (rval is a character vector)
+    output <- paste0(rval, collapse = "\n")
+
+    resp <- post_message(
+      token = token,
+      channel = channel,
+      username = username,
+      emoji = icon_emoji,
       txt = sprintf("```%s```", output),
       link_names = 1,
       thread_ts = thread_ts,
