@@ -126,23 +126,6 @@ slackr <- function(
 
 #' Same as slackR but i removed the message will be always be in code block and will send the message var in the slack message also
 #'
-#' @param ... expressions to be sent to Slack.
-#' @param channel Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See the \href{https://api.slack.com/methods/chat.postMessage#channels}{chat.postMessage endpoint documentation} for details.
-#' @param username what user should the bot be named as (chr).
-#' @param icon_emoji what emoji to use (chr) `""` will mean use the default.
-#' @param token Authentication token bearing required scopes.
-#' @param thread_ts Provide another message's ts value to make this message a reply. Avoid using a reply's ts value; use its parent instead.
-#' @param reply_broadcast Used in conjunction with thread_ts and indicates whether reply should be made visible to everyone in the channel or conversation. Defaults to FALSE.
-#' @return the response (invisibly)
-#' @note You need a <https://www.slack.com> account and will also need to
-#'       set up an API token <https://api.slack.com/>
-#' @seealso [slackr_setup()], [slackr_bot()], [slackr_dev()],
-#'          [slackr_save()], [slackr_upload()]
-#' @examples
-#' \dontrun{
-#' slackr_setup()
-#' slackr("iris info", head(iris), str(iris))
-#' }
 #' @export
 slackr_error_msg <- function(
   ...,
