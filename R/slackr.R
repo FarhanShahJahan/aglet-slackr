@@ -125,6 +125,7 @@ slackr <- function(
 }
 
 #' Same as slackR but i removed the message will be always be in code block and will send the message var in the slack message also
+#'
 #' @param ... expressions to be sent to Slack.
 #' @param channel Channel, private group, or IM channel to send message to. Can be an encoded ID, or a name. See the \href{https://api.slack.com/methods/chat.postMessage#channels}{chat.postMessage endpoint documentation} for details.
 #' @param username what user should the bot be named as (chr).
